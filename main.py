@@ -1,9 +1,9 @@
 from typing import List
 from uuid import UUID, uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query, Path, Body
 
-from models import Gender, Role, User, UserUpdateRequest
+from models import Gender, Role, User, UserUpdateRequest, Genre, Author, Book
 
 app = FastAPI()
 
@@ -29,10 +29,47 @@ db: List[User] = [
 async def root():
     return {"message": "Hello World"}
 
+
+# http://127.0.0.1:8000/book?q=qqqq
+@app.get("/user")
+def get_user(
+    q: List[str] = Query(
+        ["test", "test2"],
+        min_length=2,
+        max_length=10,
+        description="Query",
+        deprecated=True,
+    )
+):
+    return q
+
+
+@app.post('/book')
+def create_book(item: Book, author: Author, quantity: int = Body(...)):
+    return {"item": item, "author": author, "quantity": quantity}
+
+
+@app.post('/author')
+def create_author(author: Author = Body(..., embed=True)):
+    return {"author": author}
+
+
+# http://127.0.0.1:8000/book/2?pages=200
+@app.get('/book/{pk}')
+def get_single_book(pk: int = Path(..., gt=1, le=20), pages: int = Query(None, gt=10, le=500)):
+    return {"pk": pk, "pages": pages}
+
+
 # http://127.0.0.1:8000/22?q=qqqqqqqq
 @app.get("/{pk}")
 def get_item(pk: int, q: str = None):
     return {"key": pk, "q": q}
+
+
+# http://127.0.0.1:8000/user/2/items/tv/
+@app.get("/user/{pk}/items/{item}/")
+def get_user_item(pk: int, item: str):
+    return {"user": pk, "item": item}
 
 
 @app.get("/api/v1/users/")
