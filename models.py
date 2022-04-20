@@ -13,7 +13,7 @@ class Genre(BaseModel):
 class Author(BaseModel):
     first_name: str
     last_name: str
-    age: int = Field(..., gt=15, lt=90)
+    age: int = Field(..., gt=15, lt=90, description="Author's age more than 15 and less than 90")
 
     # or like this
     # @validator('age')
